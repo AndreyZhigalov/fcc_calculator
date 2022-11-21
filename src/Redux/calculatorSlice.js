@@ -1,13 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const basicOperants = /[\/\*\-\+]/;
-const allOperants = /[\/\*\-\+\√\^\.]/
-const endsWithOperant = /[\/\*\-\+\√\^\.]+$/
-const multiOperants = /([\/\*\-\+\√\^\.])([\/\*\-\+\√\^\.]{1,})([\/\*\-\+\√\^\.])/g
-const negativeIntRegex = /([\/\*\-\+]{1})(\-)(\d[\.\d]*)/g
-const powerRegex = /(√)(\d[\.\d]*)/g
-const percentRegex = /\d[\.\d]*[\/\*\-\+]*\d*[\.\d]*%/;
-const intRegex = /\d[\.\d]*/
+const allOperants = /[\/\*\-\+\√\^]$/
+const endsWithOperant = /[\/\*\-\+\√\^]+$/
+const multiOperantsRegex = /([\/\*\-\+\√\^]{2,})([\/\*\-\+\√\^]+)/g
+const negativeIntRegex = /([\/\*\-\+]{1})(\-)(\d[\\.\d]*)/g
+const squereRegex = /(√)(\d[\\.\d]*)/g
+const powerRegex = /(\d[\\.\d]*)(\^)(\d[\\.\d]*)/g
+const percentRegex = /(\d*[\\.\d]*||\(\d*[\\.\d]*\*\*\d*[\\.\d]*\)||\(\d*[\\.\d]*\*\*\(1\/2\)\))([\/\*\-\+]*)(\d+[\\.\d]*)(%)/g;
 
 const initialState = {
     formula: "0",
@@ -44,29 +43,15 @@ const calculatorSlice = createSlice({
     initialState,
     reducers: {
         evaluate(state) {
-            let replacedFormula = state.formula.replaceAll(/\^/g, "**")
-                .replaceAll(powerRegex, "$2**(1/2)")
-                .replaceAll(multiOperants, "$3")
-                .replaceAll(negativeIntRegex, "$1($2$3)")
-
-            while (replacedFormula.match(percentRegex)) { // ПРОЦЕНТЫ
-                let matches = replacedFormula.match(percentRegex);
-                let firstInt = matches[0].match(intRegex)[0]
-                let percentInt = matches[0].match(/\d[\.\d]*%/)[0].slice(0, -1)
-                let operator = matches[0].match(basicOperants) && matches[0].match(basicOperants)[0]
-                let startIndex = matches.index
-
-                if (!operator && startIndex == 0) {
-                    replacedFormula = `${percentInt / 100}` + replacedFormula.slice(matches[0].length);
-                } else if (operator && operator.match(/[\+\-]+/)) {
-                    replacedFormula = replacedFormula.slice(0, startIndex) + firstInt + operator + `${firstInt * (percentInt / 100)}` + replacedFormula.slice(startIndex + matches[0].length);
-                } else {
-                    replacedFormula = replacedFormula.slice(0, startIndex) + firstInt + operator + `${percentInt / 100}` + replacedFormula.slice(startIndex + matches[0].length);
-                }
-            }
+            let replacedFormula = state.formula.replaceAll(squereRegex, "($2**(1/2))")
+                .replaceAll(powerRegex, "($1**$3)")
+                .replace(/^(\d[\\.\d]*)(%)$/, "$1/100")
+                .replaceAll(percentRegex, "$1$2($1*($3/100))")
+                .replaceAll(negativeIntRegex, "$1(0-$3)")
+                .replaceAll(multiOperantsRegex, "$2")
 
             try {
-                let result = 10000000000000 * (new Function(`return ${replacedFormula}`))() / 10000000000000
+                let result = 10000000000 * (new Function(`return ${replacedFormula}`))().toFixed(4) / 10000000000
                 if (result === Infinity) {
                     state.formula = "Бесконечность"
                 } else if (isNaN(result)) {
@@ -80,14 +65,14 @@ const calculatorSlice = createSlice({
 
         },
         getInput(state, action) {
-            const value = action.payload
-            const lastValue = state.lastInput
+            let value = action.payload
+            let lastValue = state.lastInput
             if (lastValue === "0" && value === ".") {
                 state.formula += value
                 state.lastInput = value
             } else if (lastValue !== value && value === ".") {
-                allOperants.test(lastValue) ? state.formula += "0." : state.formula += value
-                state.isDisabled = true
+                state.isDisabled = true;
+                Number.isFinite(+lastValue) ? state.formula += value : state.formula += "0.";
                 state.lastInput = value
             } else if (lastValue === "." && value === ".") {
                 state.isDisabled = true
@@ -100,7 +85,6 @@ const calculatorSlice = createSlice({
                     state.formula += value
                     state.lastInput = value
                 } else if (value === "+" && lastValue === "+") {
-
                 } else {
                     state.formula += value
                     state.lastInput = value

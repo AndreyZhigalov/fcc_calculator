@@ -1,18 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const allOperants = /[\/\*\-\+\√\^]$/
-const endsWithOperant = /[\/\*\-\+\√\^]+$/
-const multiOperantsRegex = /([\/\*\-\+\√\^]{2,})([\/\*\-\+\√\^]+)/g
-const negativeIntRegex = /([\/\*\-\+]{1})(\-)(\d[\\.\d]*)/g
-const squereRegex = /(√)(\d[\\.\d]*)/g
-const powerRegex = /(\d[\\.\d]*)(\^)(\d[\\.\d]*)/g
-const percentRegex = /(\d*[\\.\d]*||\(\d*[\\.\d]*\*\*\d*[\\.\d]*\)||\(\d*[\\.\d]*\*\*\(1\/2\)\))([\/\*\-\+]*)(\d+[\\.\d]*)(%)/g;
+const allOperants = /[\/\*\-\+\u221a\^]$/;
+const endsWithOperant = /[\/\*\-\+\u221a\^]+$/;
+const multiOperantsRegex = /([\/\*\-\+\u221a\^]{2,})([\/\*\-\+\u221a\^]+)/g;
+const negativeIntRegex = /([\/\*\-\+]{1})(\-)(\d[\\.\d]*)/g;
+const squereRegex = /(\u221a)(\d[\\.\d]*)/g;
+const powerRegex = /(\d[\\.\d]*)(\^)(\d[\\.\d]*)/g;
+const percentRegex1 = /(\d*[\\.\d]*||\(\d*[\\.\d]*\*\*\d*[\\.\d]*\)||\(\d*[\\.\d]*\*\*\(1\/2\)\))([\-\+]+)(\d+[\\.\d]*)(%)/g;
+const percentRegex2 = /(\d*[\\.\d]*||\(\d*[\\.\d]*\*\*\d*[\\.\d]*\)||\(\d*[\\.\d]*\*\*\(1\/2\)\))([\/\*]+)(\d+[\\.\d]*)(%)/g;
 
 const initialState = {
     formula: "0",
     lastInput: "",
-    isError: false,
-    isInfinity: false,
     isDisabled: false,
     buttonsData: [
         { id: "percent", value: "%", text: "%" },
@@ -46,12 +45,13 @@ const calculatorSlice = createSlice({
             let replacedFormula = state.formula.replaceAll(squereRegex, "($2**(1/2))")
                 .replaceAll(powerRegex, "($1**$3)")
                 .replace(/^(\d[\\.\d]*)(%)$/, "$1/100")
-                .replaceAll(percentRegex, "$1$2($1*($3/100))")
+                .replaceAll(percentRegex1, "$1$2($1*($3/100))")
+                .replaceAll(percentRegex2, "($1$2($3/100))")
                 .replaceAll(negativeIntRegex, "$1(0-$3)")
-                .replaceAll(multiOperantsRegex, "$2")
-
+                .replaceAll(multiOperantsRegex, "$2");
+                            
             try {
-                let result = 10000000000 * (new Function(`return ${replacedFormula}`))().toFixed(4) / 10000000000
+                let result = 1e10 * (new Function(`return ${replacedFormula}`))().toFixed(4) / 1e10;
                 if (result === Infinity) {
                     state.formula = "Бесконечность"
                 } else if (isNaN(result)) {

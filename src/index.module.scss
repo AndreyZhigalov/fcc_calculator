@@ -1,0 +1,189 @@
+$fontStrong: 'Kdam Thmor Pro', sans-serif;
+$fontCommon: 'Martel Sans', sans-serif;
+
+// цвета Джотаро
+$jotaroScreenColor: #b859fc;
+$jotaroBorderColor: #f0f0f0;
+$jotaroButtonColor: #b246ff;
+$jotaroTextColor: #ffffff;
+$jotaroBackgroundColor: #34014b;
+
+// цвета Спидвагона
+$speedwagonScreenColor: #ffce0b;
+$speedwagonBorderColor: #282828;
+$speedwagonButtonColor: #ffcc00;
+$speedwagonTextColor: #282828;
+$speedwagonBackgroundColor: #e1b400;
+
+:root {
+  font-family: $fontStrong;
+  color: $jotaroTextColor;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+body {
+  background-color: rgb(5, 4, 35);
+  background-size: 100vw 100vh;
+  width: 100vw;
+  height: 100vh;
+  min-height: 660px;
+  min-width: 330px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+h1 {
+  font: 800 35px $fontStrong;
+  text-align: center;
+  margin-bottom: 10px;
+  border-bottom: $jotaroTextColor 2px solid;
+}
+.main {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 700px;
+  width: 700px;
+}
+/*
+    ОБОЛОЧКА КАЛЬКУЛЯТОРА
+*/
+.calculator,
+.calculator2 {
+  position: relative;
+  background-image: url('./assets/img/calculator-body.jpg');
+  background-size: cover;
+  border: 1px solid $jotaroScreenColor;
+  box-shadow: 0 0 40px $jotaroScreenColor;
+  width: 330px;
+  height: 600px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 20px;
+  border-radius: 20px;
+  transition: background-image 0.3s;
+  .toggler {
+    position: absolute;
+    width: 50px;
+    height: 30px;
+    top: 20px;
+    left: 10px;
+    border-radius: 10px;
+    background-color: $jotaroBackgroundColor;
+    &::after {
+      position: absolute;
+      content: '';
+      width: 23px;
+      height: 23px;
+      background-color: $jotaroTextColor;
+      top: 2px;
+      right: 2px;
+      border-radius: 10px;
+      transition: background-color, right 0.3s;
+    }
+  }
+  .off {
+    &::after {
+      top: 2px;
+      right: 21px;
+      transition: background-color, right 0.3s;
+    }
+  }
+  .keyboard {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 290px;
+    height: 75%;
+    .button {
+      background-color: $jotaroButtonColor;
+      border: $jotaroBorderColor solid 2px;
+      border-radius: 10px;
+      color: $jotaroTextColor;
+      font-size: 30px;
+      min-width: 67px;
+      height: 67px;
+      font-family: $fontStrong;
+      &[id=subtract],
+      &[id=decimal] {
+        line-height: 20px;
+        font-size: 50px;
+      }
+      &[id=equals],
+      &[id=add] {
+        line-height: 20px;
+        font-size: 40px;
+      }
+    }
+  }
+  .screen {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    text-align: end;
+    color: $jotaroTextColor;
+    background-color: $jotaroScreenColor;
+    border: $jotaroBorderColor solid 2px;
+    border-radius: 10px;
+    width: 290px;
+    height: 70px;
+    padding: 5px 10px;
+    font-size: 25px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .button:active {
+    background-color: $jotaroScreenColor;
+    border: $jotaroBorderColor solid 2px;
+    border-radius: 10px;
+    color: $jotaroBorderColor;
+  }
+}
+
+/*
+    КАЛЬКУЛЯТОР СО СПИДВАГОНОМ
+*/
+.calculator2 {
+  background-image: url('./assets/img/SpeedwagonCalculatorBody.jpg');
+  border: 1px solid $speedwagonBackgroundColor;
+  box-shadow: 0 0 40px $speedwagonBackgroundColor;
+  .keyboard {
+    .button {
+      background-color: $speedwagonButtonColor;
+      color: $speedwagonTextColor;
+      border: $speedwagonBorderColor solid 2px;
+    }
+    .button:active {
+      background-color: $speedwagonBackgroundColor;
+      color: $speedwagonTextColor;
+      border: $speedwagonBorderColor solid 2px;
+    }
+  }
+  .screen {
+    background-color: $speedwagonScreenColor;
+    color: $speedwagonTextColor;
+    border: $speedwagonBorderColor solid 2px;
+  }
+  .toggler {
+    background-color: $speedwagonBackgroundColor;
+    &::after {
+      background-color: $speedwagonTextColor;
+      transition: background-color, right 0.3s;
+    }
+  }
+}
